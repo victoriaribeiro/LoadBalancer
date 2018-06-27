@@ -21,12 +21,9 @@ import java.util.concurrent.Semaphore;
 
 public class servidor implements Runnable {
 
-
     private static Socket socketLoadB = null;
     private static BufferedReader in = null;
     private static PrintWriter out = null;
-
-
 
     public static void main(String args[]) throws UnknownHostException, IOException {
 
@@ -35,10 +32,8 @@ public class servidor implements Runnable {
         try {
             socketLoadB = new Socket(host, 54321);
 
-
             in = new BufferedReader(new InputStreamReader(socketLoadB.getInputStream()));
             out = new PrintWriter(socketLoadB.getOutputStream(), true);
-
 
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + host);
@@ -71,66 +66,67 @@ public class servidor implements Runnable {
     @Override
     public void run() {
 
-
-        try{
+        try {
 
             File file = new File("saida1.txt");
-            if(!file.exists())
+            if (!file.exists())
                 file.createNewFile();
-
 
             while (true) {
                 String primo = "";
 
-                FileWriter writer = new FileWriter(file.getAbsoluteFile(),true);
+                FileWriter writer = new FileWriter(file.getAbsoluteFile(), true);
                 BufferedWriter bufferedWriter = new BufferedWriter(writer);
 
                 try {
                     String read = "Leitura";
                     String line = in.readLine();
 
-                    System.out.println(line);
+                    // System.out.println(line);
 
-
-                    if (line.contains(read)){
+                    if (line.contains(read)) {
                         BufferedReader reader = new BufferedReader(new FileReader(file));
                         System.out.println("---- Início do arquivo ----");
 
-                        while( reader.ready() ){
+                        while (reader.ready()) {
                             String linha = reader.readLine();
-                            System.out.println(linha);
+                            // System.out.println(linha);
                         }
                         reader.close();
                         System.out.println("---- Fim do arquivo ----");
 
-                    }
-                    else if (line.equals("stop")){
+                    } else if (line.equals("stop")) {
+                        long inicio = System.currentTimeMillis();
                         String resposta = in.readLine();
-                        while(!resposta.contains("primo")){
+                        while (!resposta.contains("primo")) {
+                            long decorrido = System.currentTimeMillis() - inicio;
+                            if (decorrido > 10) {
+                                System.out.println("Tempo estourado");
+                                break;
+                            }
                             resposta = in.readLine();
                         }
                         bufferedWriter.write(resposta + "\n");
-                    }
-                    else{
+                    } else {
                         int num = Integer.parseInt(line);
                         boolean ehPrimo = verificaPrimo(num);
-                        if(ehPrimo == true){
+                        if (ehPrimo == true) {
                             primo = "O valor " + line + " é primo\n";
-                        }
-                        else{
+                        } else {
                             primo = "O valor " + line + " não é primo\n";
                         }
-                        try{
+                        try {
                             bufferedWriter.write(primo);
                             out.println(primo);
-                        }catch(Exception e){}
+                        } catch (Exception e) {
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 bufferedWriter.close();
             }
-        } catch(IOException ex){
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }

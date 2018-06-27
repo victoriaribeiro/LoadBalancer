@@ -231,7 +231,7 @@ class serverThread extends Thread {
 				System.out.println("nada ainda");
 			}
 			if(serverSocket.isConnected()){
-				System.out.println("conectado");
+				System.out.println("conectado1");
 				caiu1 = false;
 			}
 
@@ -252,7 +252,7 @@ class serverThread extends Thread {
 				System.out.println("nada ainda");
 			}
 			if(serverSocket2.isConnected()){
-				System.out.println("conectado");
+				System.out.println("conectado2");
 				caiu2 = false;
 
 			}
@@ -274,7 +274,7 @@ class serverThread extends Thread {
 				System.out.println("nada ainda");
 			}
 			if(serverSocket3.isConnected()){
-				System.out.println("conectado");
+				System.out.println("conectado3");
 				caiu3 = false;
 
 			}
@@ -328,7 +328,7 @@ class serverThread extends Thread {
 								break;
 
 							}catch(Exception e){
-								System.out.println("Servidor caiu");
+								System.out.println("Servidor caiu1");
 								caiu1 = true;
 								reconecta1.start();
 								System.out.println("voltou");
@@ -362,7 +362,7 @@ class serverThread extends Thread {
 								break;
 
 							}catch(Exception e){
-								System.out.println("Servidor caiu");
+								System.out.println("Servidor caiu2");
 								caiu2 = true;
 								reconecta2.start();
 								System.out.println("voltou");
@@ -403,7 +403,7 @@ class serverThread extends Thread {
 								break;
 
 							}catch(Exception e){
-								System.out.println("Servidor caiu");
+								System.out.println("Servidor caiu3");
 								caiu3 = true;
 								reconecta3.start();
 								System.out.println("voltou");
@@ -420,20 +420,18 @@ class serverThread extends Thread {
 				}else{
 					num = rand.nextInt(3)+1;
 					// System.out.println("Leitura encaminhada pelo cliente " + this.cliente + " e direcionada ao Servidor de Dados " + num);
-					switch (num) {
+					switch (num) {						
 						case 1:
-						out1.println(this.operacao);
-
-
+						if(!caiu1)
+							out1.println(this.operacao);
 						break;
 						case 2:
-						out2.println(this.operacao);
-
+						if(!caiu2)
+							out2.println(this.operacao);
 						break;
 						case 3:
-						out3.println(this.operacao);
-
-
+						if(!caiu3)
+							out3.println(this.operacao);
 						break;
 						default:
 						break;

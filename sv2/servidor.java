@@ -82,7 +82,7 @@ public class servidor implements Runnable {
                     String read = "Leitura";
                     String line = in.readLine();
 
-                    // System.out.println(line);
+                    System.out.println(line);
 
                     if (line.contains(read)) {
                         BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -90,7 +90,7 @@ public class servidor implements Runnable {
 
                         while (reader.ready()) {
                             String linha = reader.readLine();
-                            // System.out.println(linha);
+                            System.out.println(linha);
                         }
                         reader.close();
                         System.out.println("---- Fim do arquivo ----");
@@ -100,13 +100,15 @@ public class servidor implements Runnable {
                         String resposta = in.readLine();
                         while (!resposta.contains("primo")) {
                             long decorrido = System.currentTimeMillis() - inicio;
-                            if (decorrido > 10) {
+                            if (decorrido < 100) {                                
+                                resposta = in.readLine();
+                            }else{
                                 System.out.println("Tempo estourado");
                                 break;
-                            }
-                            resposta = in.readLine();
+                            }                            
                         }
-                        bufferedWriter.write(resposta + "\n");
+                        if(resposta.contains("primo"))
+                            bufferedWriter.write(resposta + "\n");
                     } else {
                         int num = Integer.parseInt(line);
                         boolean ehPrimo = verificaPrimo(num);

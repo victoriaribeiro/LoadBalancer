@@ -14,7 +14,6 @@ public class cliente implements Runnable {
 
     private static Socket clienteSocket = null;
 
-    private static BufferedReader in = null;
     private static PrintWriter out = null;
 
     public static void main(String args[]) throws UnknownHostException, IOException {
@@ -22,7 +21,6 @@ public class cliente implements Runnable {
 
         try {
             clienteSocket = new Socket(host, 12345);
-            in = new BufferedReader(new InputStreamReader(clienteSocket.getInputStream()));
             out = new PrintWriter(clienteSocket.getOutputStream(), true);
 
         } catch (UnknownHostException e) {

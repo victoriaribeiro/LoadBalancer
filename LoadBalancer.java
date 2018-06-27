@@ -34,16 +34,9 @@ public class LoadBalancer {
 			Socket ss2 = socketServer.accept();
 			Socket ss3 = socketServer.accept();
 
-			// Socket teste1 = socketTeste.accept();
-			// Socket teste2 = socketTeste.accept();
-			// Socket teste3 = socketTeste.accept();
-
-
 			try{
 				new clientThread(socketClient.accept(), fila, filaClientes).start();
 				new serverThread(ss1, ss2, ss3,fila, filaClientes, socketServer).start();
-				// new testaConexao(teste1,teste2,teste3).start();
-
 			}catch(Exception ex){
 				ex.printStackTrace();
 			}
@@ -51,81 +44,6 @@ public class LoadBalancer {
 
 		}
 
-	}
-}
-
-class testaConexao extends Thread{
-	Socket teste1 = null;
-	Socket teste2 = null;
-	Socket teste3 = null;
-
-	private static BufferedReader inTeste1 = null;
-	private static PrintWriter outTeste1 = null;
-
-	private static BufferedReader inTeste2 = null;
-	private static PrintWriter outTeste2 = null;
-
-	private static BufferedReader inTeste3 = null;
-	private static PrintWriter outTeste3 = null;
-
-
-	public testaConexao(Socket s1, Socket s2, Socket s3){
-		this.teste1 = s1;
-		this.teste2 = s2;
-		this.teste3 = s3;
-
-		try{
-			inTeste1 = new BufferedReader(new InputStreamReader(teste1.getInputStream()));
-			outTeste1 = new PrintWriter(teste1.getOutputStream(), true);
-
-			inTeste2 = new BufferedReader(new InputStreamReader(teste2.getInputStream()));
-			outTeste2 = new PrintWriter(teste2.getOutputStream(), true);
-
-			inTeste3 = new BufferedReader(new InputStreamReader(teste3.getInputStream()));
-			outTeste3 = new PrintWriter(teste3.getOutputStream(), true);
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void run(){
-		String line = null;
-		while(true){
-			try{
-
-				line = inTeste1.readLine();
-				while(!line.equals("vivo")){
-					line = inTeste1.readLine();
-				}
-			}catch(Exception e){
-				System.out.println("servidor 1 caiu");
-			}
-
-			try{
-				line = inTeste2.readLine();
-				while(!line.equals("vivo")){
-					line = inTeste2.readLine();
-				}
-			}catch(Exception e){
-				System.out.println("servidor 2 caiu");
-			}
-
-			try{
-				// start = Calendar.getInstance().get(Calendar.MILLISECOND);
-				line = inTeste3.readLine();
-				while(!line.equals("vivo")){
-					line = inTeste3.readLine();
-					// long end = Calendar.getInstance().get(Calendar.MILLISECOND);
-					// if((end-start) > 1000){
-					// 	System.out.println("servidor 3 caiu");
-					// 	break;
-					// }
-				}
-			}catch(Exception e){
-				System.out.println("servidor 3 caiu");
-			}
-		}
 	}
 }
 
@@ -282,8 +200,6 @@ class serverThread extends Thread {
 		}
 	};
 
-	// testaConexao.start();
-
 	@Override
 	public void run() {
 		int num = 0;
@@ -297,9 +213,9 @@ class serverThread extends Thread {
 
 				if(!operacao.equals("Leitura")){
 					num = rand.nextInt(3)+1;
-					System.out.println("ok" + num);
+					// System.out.println("ok" + num + " " + caiu1+ caiu2 + caiu3);
 
-					// System.out.println("Valor " + this.operacao+ " recebido do cliente" + this.cliente + " e direcionada ao Servidor de Dados " + num);
+					System.out.println("Valor " + this.operacao+ " recebido do cliente" + this.cliente + " e direcionada ao Servidor de Dados " + num);
 					switch (num){
 						case 1:
 						if(!caiu1){
@@ -308,9 +224,11 @@ class serverThread extends Thread {
 
 								out1.println(this.operacao);
 								count = fila.size();
-								// System.out.println("Processo de consistência iniciado, enfileirando requisições");
-								out3.println("stop");
-								out2.println("stop");
+								System.out.println("Processo de consistência iniciado, enfileirando requisições");
+								if(!caiu3)
+									out3.println("stop");
+								if(!caiu2)
+									out2.println("stop");
 								String resposta1 = in1.readLine();
 								while(!resposta1.contains("primo")){
 									long decorrido1 = System.currentTimeMillis() - inicio1;
@@ -321,20 +239,25 @@ class serverThread extends Thread {
 									resposta1 = in1.readLine();
 								}
 								System.out.println(resposta1);
-								out3.println(resposta1);
-								out2.println(resposta1);
+								if(!caiu3)
+									out3.println(resposta1);
+								if(!caiu2)
+									out2.println(resposta1);
 								count = fila.size() - count;
-								// System.out.println("Procedimento de consistência finalizado, foram enfileiradas " + count +  " requisições neste período");
+								System.out.println("Procedimento de consistência finalizado, foram enfileiradas " + count +  " requisições neste período");
 								break;
 
 							}catch(Exception e){
-								System.out.println("Servidor caiu1");
+								// System.out.println("Servidor caiu1");
 								caiu1 = true;
-								reconecta1.start();
-								System.out.println("voltou");
+								Thread t1 = new Thread(reconecta1);
+								t1.start();
+								// System.out.println("voltou");
 								break;
 
 							}
+						}else{
+							// System.out.println("caidooooo");
 						}
 						break;
 
@@ -345,31 +268,42 @@ class serverThread extends Thread {
 								long inicio2 = System.currentTimeMillis();
 								out2.println(this.operacao);
 								count = fila.size();
-								// System.out.println("Processo de consistência iniciado, enfileirando requisições");
-								out3.println("stop");
-								out1.println("stop");
+								System.out.println("Processo de consistência iniciado, enfileirando requisições");
+								if(!caiu3)
+									out3.println("stop");
+								if(!caiu1)
+									out1.println("stop");
 								String resposta2 = in2.readLine();
-								while(!resposta2.contains("primo")){
 
-									resposta2 = in2.readLine();
+								while(!resposta2.contains("primo")){
+									long decorrido2 = System.currentTimeMillis() - inicio2;
+									if(decorrido2>1000){
+										System.out.println("Tempo estourado");
+										break;
+									}
+									resposta2= in2.readLine();
 								}
 								System.out.println(resposta2);
-
-								out3.println(resposta2);
-								out1.println(resposta2);
+								if(!caiu3)
+									out3.println(resposta2);
+								if(!caiu1)
+									out1.println(resposta2);
 								count = fila.size() - count;
-								// System.out.println("Procedimento de consistência finalizado, foram enfileiradas " + count +  " requisições neste período");
+								System.out.println("Procedimento de consistência finalizado, foram enfileiradas " + count +  " requisições neste período");
 								break;
 
 							}catch(Exception e){
-								System.out.println("Servidor caiu2");
+								// System.out.println("Servidor caiu2");
 								caiu2 = true;
-								reconecta2.start();
-								System.out.println("voltou");
+								Thread t2 = new Thread(reconecta2);
+								t2.start();
+								// System.out.println("voltou");
 								break;
 
 							}
 
+						}else{
+							// System.out.println("caidooooo");
 						}
 						break;
 
@@ -383,9 +317,11 @@ class serverThread extends Thread {
 
 								out3.println(this.operacao);
 								count = fila.size();
-								// System.out.println("Processo de consistência iniciado, enfileirando requisições");
-								out2.println("stop");
-								out1.println("stop");
+								System.out.println("Processo de consistência iniciado, enfileirando requisições");
+								if(!caiu2)
+									out2.println("stop");
+								if(!caiu1)
+									out1.println("stop");
 
 								String resposta3 = in3.readLine();
 								while(!resposta3.contains("primo")){
@@ -397,29 +333,35 @@ class serverThread extends Thread {
 									resposta3 = in3.readLine();
 								}
 								System.out.println(resposta3);
-								out2.println(resposta3);
-								out1.println(resposta3);
+								if(!caiu2)
+									out2.println(resposta3);
+								if(!caiu1)
+									out1.println(resposta3);
 								count = fila.size() - count;
 								break;
 
 							}catch(Exception e){
-								System.out.println("Servidor caiu3");
+								// System.out.println("Servidor caiu3");
 								caiu3 = true;
-								reconecta3.start();
-								System.out.println("voltou");
+								Thread t3 = new Thread(reconecta3);
+								t3.start();
+								// System.out.println("voltou");
 								break;
 
 							}
 
+						}else{
+							// System.out.println("caidooooo");
 						}
+						System.out.println("Procedimento de consistência finalizado, foram enfileiradas " + count +  " requisições neste período");
+
 						break;
-						// System.out.println("Procedimento de consistência finalizado, foram enfileiradas " + count +  " requisições neste período");
 						default:
 						break;
 					}
 				}else{
 					num = rand.nextInt(3)+1;
-					// System.out.println("Leitura encaminhada pelo cliente " + this.cliente + " e direcionada ao Servidor de Dados " + num);
+					System.out.println("Leitura encaminhada pelo cliente " + this.cliente + " e direcionada ao Servidor de Dados " + num);
 					switch (num) {						
 						case 1:
 						if(!caiu1)
